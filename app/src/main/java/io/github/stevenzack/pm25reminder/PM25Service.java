@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
@@ -30,6 +31,7 @@ public class PM25Service extends Service {
     private int bound;
     private String city;
     private SharedPreferences sp;
+    public static Resources resources;
     public PM25Service() {
         thread=new Thread(new Runnable() {
             @Override
@@ -61,27 +63,6 @@ public class PM25Service extends Service {
         thread.start();
         return super.onStartCommand(intent, flags, startId);
     }
-
-    private void buldNtf(String string) {
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "My CHANEL ID")
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle(string)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-    }
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("My CHANEL ID", "name", importance);
-            channel.setDescription("description");
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
     private void showNtf(String str) {
         final String NOTIFICATION_CHANNEL_ID = "my_notification_channel";
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -97,7 +78,12 @@ public class PM25Service extends Service {
         }
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "my_notification_channel");
         long when = System.currentTimeMillis();
-        builder.setSmallIcon(R.mipmap.ic_launcher_round);
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setSmallIcon(R.drawable.lung);
+            builder.setColor(resources.getColor(R.color.red));
+        } else {
+            builder.setSmallIcon(R.drawable.lung);
+        }
         builder.setContentTitle(str);
         Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class).putExtra("notification", "1");
         PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 1, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
